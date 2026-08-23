@@ -1,0 +1,50 @@
+name: Render diario Mimi y Dudu
+
+on:
+  repository_dispatch:
+    types: [render-mimi-dudu]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mimi-dudu-render
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar FFmpeg y jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg jq
+
+      - name: Preparar solicitud
+        env:
+          PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
+        run: |
+          if [ -z "$PAYLOAD_JSON" ] || [ "$PAYLOAD_JSON" = "null" ]; then
+            PAYLOAD_JSON='{"job_id":"prueba-manual","preset":"dance_loop","hook_text":"PRUEBA","twist_text":"FUNCIONA","end_text":"LISTO"}'
+          fi
+          printf '%s' "$PAYLOAD_JSON" > /tmp/payload.json
+
+      - name: Renderizar video vertical
+        run: |
+          find output -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.json' \) -delete
+          bash scripts/render.sh /tmp/payload.json
+
+      - name: Publicar archivo para Meta
+        run: |
+          git config user.name "mimi-dudu-bot"
+          git config user.email "mimi-dudu-bot@users.noreply.github.com"
+          git add output/
+          git commit -m "render: video diario" || exit 0
+          git push
