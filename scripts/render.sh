@@ -45,27 +45,57 @@ jq -r '.end_text // "OTRA VEZ"' "$PAYLOAD_PATH" | tr '\n\r' '  ' | cut -c1-70 > 
 case "$preset" in
   cookie_heist)
     prop="$ASSET_DIR/real_cookie.png"
-    mimi_x="60+18*sin(2*PI*t*$beat)"; mimi_y="790-22*abs(sin(2*PI*t*$beat))"
-    dudu_x="390-120*min(t/10,1)+14*sin(2*PI*t*$beat)"; dudu_y="760-24*abs(sin(2*PI*t*$beat))"
-    prop_x="285+8*sin(4*PI*t*$beat)"; prop_y="1035-12*abs(sin(4*PI*t*$beat))"
+    aux_prop="$ASSET_DIR/real_cookie.png"
+    prop_scale=165; aux_scale=80
+    # 0-3: ven la galleta. 3-7: Mimi se acerca. 7-12: la roba y Dudu la persigue.
+    # 12-13.2: salen de escena. Desde 13.2 vuelve la posición inicial para crear el bucle.
+    mimi_x="if(lt(t,3),45,if(lt(t,7),45+18.75*(t-3),if(lt(t,12),120-100*(t-7),if(lt(t,13.2),-380,45))))"
+    mimi_y="790-12*abs(sin(PI*t*$beat))*between(t,3,7)-42*abs(sin(PI*(t-7)/0.8))*between(t,7,7.8)"
+    dudu_x="if(lt(t,7),405,if(lt(t,12),405-100*(t-7),if(lt(t,13.2),-95,405)))"
+    dudu_y="775-70*abs(sin(PI*(t-7)/0.9))*between(t,7,7.9)-16*abs(sin(PI*t*$beat))*between(t,8,12)"
+    prop_x="if(lt(t,7),300,if(lt(t,12),300-100*(t-7),if(lt(t,13.2),-200,300)))"
+    prop_y="1025-18*abs(sin(PI*t*$beat))*between(t,7,12)"
+    aux_x="-300"; aux_y="1100"
     ;;
   vacuum_chase)
     prop="$ASSET_DIR/real_vacuum.png"
-    mimi_x="50+32*sin(2*PI*t*$beat)"; mimi_y="730-95*abs(sin(PI*t*$beat))"
-    dudu_x="390+36*sin(2*PI*t*$beat+1.2)"; dudu_y="740-100*abs(sin(PI*t*$beat+1.2))"
-    prop_x="240+210*sin(2*PI*t/3.0)"; prop_y="1010"
+    aux_prop="$ASSET_DIR/real_cookie.png"
+    prop_scale=225; aux_scale=105
+    # 0-3: la galleta está en el suelo. 3-7: entra el aspirador y ambos observan.
+    # 7-9: susto único. 9-12: aspirador, galleta y personajes corren hacia la derecha.
+    # 12-13.2: quedan fuera. Desde 13.2 se restaura la primera escena para el bucle.
+    mimi_x="if(lt(t,3),45,if(lt(t,7),45+9*(t-3),if(lt(t,9),81,if(lt(t,12),81+170*(t-9),if(lt(t,13.2),760,45)))))"
+    mimi_y="790-8*abs(sin(PI*t*$beat))*between(t,3,7)-72*abs(sin(PI*(t-7)/0.9))*between(t,7,7.9)-14*abs(sin(PI*t*$beat))*between(t,9,12)"
+    dudu_x="if(lt(t,3),410,if(lt(t,7),410-8*(t-3),if(lt(t,9),378,if(lt(t,12),378+150*(t-9),if(lt(t,13.2),760,410)))))"
+    dudu_y="775-58*abs(sin(PI*(t-7.15)/0.9))*between(t,7.15,8.05)-16*abs(sin(PI*t*$beat))*between(t,9,12)"
+    prop_x="if(lt(t,3),-230,if(lt(t,7),-230+120*(t-3),if(lt(t,9),250+7*sin(8*PI*t),if(lt(t,12),250+150*(t-9),if(lt(t,13.2),760,-230)))))"
+    prop_y="1015"
+    aux_x="if(lt(t,7),465,if(lt(t,9),465+10*sin(8*PI*t),if(lt(t,12),465+150*(t-9),if(lt(t,13.2),760,465))))"
+    aux_y="1050-10*abs(sin(8*PI*t))*between(t,7,9)"
     ;;
   bag_surprise)
     prop="$ASSET_DIR/real_bag.png"
-    mimi_x="55+min(t*18,150)"; mimi_y="800-28*abs(sin(2*PI*t*$beat))"
-    dudu_x="405-min(t*18,150)"; dudu_y="780-30*abs(sin(2*PI*t*$beat+1.0))"
-    prop_x="245+18*sin(6*PI*t*$beat)*between(t,7,11)"; prop_y="955"
+    aux_prop="$ASSET_DIR/real_cookie.png"
+    prop_scale=210; aux_scale=90
+    # Se acercan con cautela; la bolsa tiembla; aparece una galleta y ambos retroceden.
+    mimi_x="if(lt(t,3),45,if(lt(t,7),45+8.75*(t-3),if(lt(t,9),80,if(lt(t,10.2),80-45*(t-9),if(lt(t,13.2),26,45)))))"
+    mimi_y="795-10*abs(sin(PI*t*$beat))*between(t,3,7)-78*abs(sin(PI*(t-9)/1.2))*between(t,9,10.2)"
+    dudu_x="if(lt(t,3),410,if(lt(t,7),410-3.75*(t-3),if(lt(t,9),395,if(lt(t,10.2),395+45*(t-9),if(lt(t,13.2),449,410)))))"
+    dudu_y="780-10*abs(sin(PI*t*$beat))*between(t,3,7)-78*abs(sin(PI*(t-9)/1.2))*between(t,9,10.2)"
+    prop_x="255+12*sin(12*PI*t)*between(t,6.3,9)"; prop_y="930"
+    aux_x="315"; aux_y="if(lt(t,9),1300,if(lt(t,10.5),1300-240*(t-9),if(lt(t,13.2),940,1300)))"
     ;;
   dance_loop)
     prop="$ASSET_DIR/real_cookie.png"
-    mimi_x="70+55*sin(2*PI*t*$beat)"; mimi_y="780-34*abs(sin(2*PI*t*$beat))"
-    dudu_x="390-55*sin(2*PI*t*$beat)"; dudu_y="760-34*abs(sin(2*PI*t*$beat))"
-    prop_x="300"; prop_y="1070+12*sin(2*PI*t*$beat)"
+    aux_prop="$ASSET_DIR/real_cookie.png"
+    prop_scale=95; aux_scale=70
+    # Este preset sí es un baile: entrada, pasos sincronizados, cruce y pose final en bucle.
+    mimi_x="if(lt(t,2),-260+160*t,if(lt(t,12.5),70+48*sin(2*PI*t*$beat),if(lt(t,14.6),70,70)))"
+    mimi_y="790-30*abs(sin(2*PI*t*$beat))*between(t,2,12.5)"
+    dudu_x="if(lt(t,2),720-155*t,if(lt(t,12.5),370-48*sin(2*PI*t*$beat),if(lt(t,14.6),370,370)))"
+    dudu_y="775-30*abs(sin(2*PI*t*$beat))*between(t,2,12.5)"
+    prop_x="310+8*sin(2*PI*t*$beat)*between(t,2,12.5)"; prop_y="1080"
+    aux_x="-300"; aux_y="1100"
     ;;
 esac
 
@@ -77,17 +107,20 @@ ffmpeg -hide_banner -loglevel warning -y \
   -loop 1 -framerate 30 -i "$ASSET_DIR/mimi.png" \
   -loop 1 -framerate 30 -i "$ASSET_DIR/dudu.png" \
   -loop 1 -framerate 30 -i "$prop" \
+  -loop 1 -framerate 30 -i "$aux_prop" \
   -stream_loop -1 -i "$ASSET_DIR/mimi_dudu_original.wav" \
   -filter_complex "
     [0:v]scale=760:1350:force_original_aspect_ratio=increase,crop=760:1350,
       zoompan=z='min(zoom+0.00035,1.06)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=450:s=720x1280:fps=30[bg];
     [1:v]scale=285:-1:flags=lanczos[mimi];
     [2:v]scale=285:-1:flags=lanczos[dudu];
-    [3:v]scale=230:-1:flags=lanczos[prop];
+    [3:v]scale=$prop_scale:-1:flags=lanczos[prop];
+    [4:v]scale=$aux_scale:-1:flags=lanczos[aux];
     [bg][prop]overlay=x='$prop_x':y='$prop_y':format=auto[s1];
     [s1][mimi]overlay=x='$mimi_x':y='$mimi_y':format=auto[s2];
     [s2][dudu]overlay=x='$dudu_x':y='$dudu_y':format=auto[s3];
-    [s3]drawtext=fontfile='$font':textfile='$WORK_DIR/hook.txt':fontcolor=white:fontsize=46:
+    [s3][aux]overlay=x='$aux_x':y='$aux_y':format=auto[s4];
+    [s4]drawtext=fontfile='$font':textfile='$WORK_DIR/hook.txt':fontcolor=white:fontsize=46:
       borderw=4:bordercolor=black:box=1:boxcolor=black@0.50:boxborderw=18:
       x=(w-text_w)/2:y=95:enable='between(t,0,3.2)',
       drawtext=fontfile='$font':textfile='$WORK_DIR/twist.txt':fontcolor=white:fontsize=44:
@@ -97,7 +130,7 @@ ffmpeg -hide_banner -loglevel warning -y \
       borderw=4:bordercolor=black:box=1:boxcolor=#1d7fa7@0.78:boxborderw=18:
       x=(w-text_w)/2:y=95:enable='between(t,12.2,15)'[v]
   " \
-  -map '[v]' -map 4:a:0 -t 15 \
+  -map '[v]' -map 5:a:0 -t 15 \
   -c:v libx264 -preset medium -crf 24 -maxrate 1400k -bufsize 2800k \
   -pix_fmt yuv420p -r 30 -c:a aac -b:a 128k -ar 48000 -ac 2 \
   -movflags +faststart "$output"
